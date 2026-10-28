@@ -1,0 +1,27 @@
+appId: com.imageflow.app
+productName: ImageFlow
+directories:
+  output: release
+  buildResources: build
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+asarUnpack:
+  - "**/node_modules/sharp/**"
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  artifactName: "ImageFlow Setup ${version}.exe"
+mac:
+  target: [dmg]
+  icon: build/icon.icns
+linux:
+  target: [AppImage]
+  icon: build/icon.png
