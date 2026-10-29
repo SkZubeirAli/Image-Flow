@@ -116,6 +116,6 @@ tests/               Unit tests (node:test)
 
 Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-## License
+## License 
 
 [MIT](LICENSE)
