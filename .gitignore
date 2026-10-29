@@ -1,6 +1,26 @@
-node_modules
-dist
-dist-electron
-release
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-electron/
+release/
+
+# Python virtual environments (not used by this project)
+venv/
+.venv/
+
+# Environment and secrets
+.env
+.env.*
+
+# Logs
 *.log
+npm-debug.log*
+
+# OS / editor
 .DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/

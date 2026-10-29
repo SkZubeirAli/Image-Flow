@@ -1,10 +1,16 @@
 {
+  "license": "MIT",
+  "author": "Shaikh Zubeir Ali",
+  "repository": {
+  "type": "git",
+  "url": "https://github.com/SkZubeirAli/imageflow.git"
+},
+"keywords": ["image-resizer", "image-compressor", "electron", "react", "sharp"],
   "name": "imageflow",
   "productName": "ImageFlow",
   "private": true,
   "version": "1.0.0",
   "description": "Bulk Image Resizer & Compressor \u2014 fully offline desktop app",
-  "author": "ImageFlow",
   "main": "dist-electron/main.js",
   "type": "commonjs",
   "scripts": {

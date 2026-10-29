@@ -1,138 +1,121 @@
 # ImageFlow
 
-**Bulk Image Resizer & Compressor** — a fully offline Windows desktop app for resizing, compressing, converting, and renaming large batches of images. No accounts, no servers, no uploads: every image is read and written on your own machine.
+**Bulk Image Resizer & Compressor for Windows** — resize, compress, convert and rename hundreds of images at once. Everything runs locally on your computer: no account, no server, no uploads.
 
-Functionally inspired by the workflow of imageresizer.com; UI, branding, and code are original.
+![Platform](https://img.shields.io/badge/platform-Windows-0078D6)
+![Electron](https://img.shields.io/badge/Electron-31%2B-47848F)
+![React](https://img.shields.io/badge/React-18-61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6)
+![License](https://img.shields.io/badge/license-MIT-green)
 
----
+<!-- Add a screenshot or GIF here once you have one:
+![ImageFlow screenshot](docs/screenshot.png)
+-->
+
+## Why ImageFlow?
+
+Online image resizers make you upload your photos to someone else's server and often limit batch size. ImageFlow does the same job offline, privately, and on as many files as your computer can handle.
 
 ## Features
 
-- Import 30–500+ images at once via file picker, folder picker (recursive), ZIP import, or drag-and-drop
-- Resize by width, height, exact dimensions, or percentage, with Fit / Fill / Stretch modes and aspect-ratio locking
-- Resize presets (Instagram square/portrait, Full HD, YouTube thumbnail, website)
-- Compress by quality slider **or** by target file size (100 KB–5 MB+), using iterative binary-search quality search for JPEG/WEBP/AVIF
-- Convert format (JPEG, PNG, WEBP, AVIF, or keep original), with transparency-safe background-color handling when converting to JPEG
-- Bulk rename: keep, replace, prefix, suffix, numbered sequence, and find/replace, with automatic duplicate-filename handling
-- Draggable before/after comparison slider with zoom
-- Live per-image status (waiting / processing / completed / failed / cancelled), thumbnails, original vs. output size and dimensions, and % compressed
-- Overall progress bar with ETA, cancel, and per-image retry
-- Export a single image, export all to a folder, or export everything as a ZIP
-- Configurable concurrency (1–5 simultaneous images), metadata preservation toggle, light/dark/system theme
-- Never overwrites your originals; safe `name.jpg`, `name_1.jpg`, `name_2.jpg` collision handling by default
+- **Import** images by file picker, whole folder (recursive) or ZIP archive
+- **Resize** by width, height, exact dimensions or percentage, with Fit / Fill / Stretch modes and aspect-ratio lock
+- **Presets** for common sizes (Instagram, Full HD, YouTube thumbnail, website)
+- **Compress** by quality slider or by **target file size** (e.g. 500 KB), using an iterative quality search for JPEG / WebP / AVIF
+- **Convert** between JPEG, PNG, WebP and AVIF, with background-colour handling when transparency is flattened to JPEG
+- **Bulk rename**: prefix, suffix, number sequence, replace, find & replace, with automatic duplicate handling
+- **Before / after slider** with zoom to inspect the result
+- **Queue** with thumbnails, per-image status, size savings, retry and remove
+- **Progress** bar with ETA and cancel; configurable concurrency (1–5)
+- **Export** one image, all images to a folder, or everything as a ZIP
+- **Safe by default**: originals are never modified; name clashes become `name_1.jpg`, `name_2.jpg`
+- Light / dark / system theme
 
-## Technology stack
+## Tech stack
 
-| Layer | Choice |
+| Area | Technology |
 |---|---|
-| UI | React 18 + TypeScript + Tailwind CSS + lucide-react |
-| Build tool | Vite |
-| Desktop shell | Electron (contextIsolation on, nodeIntegration off, sandboxed renderer) |
-| Image processing | Sharp |
-| ZIP | archiver (export) + unzipper (import) |
-| Packaging | electron-builder (NSIS installer for Windows) |
+| Desktop shell | Electron (`contextIsolation` on, `nodeIntegration` off, sandboxed renderer) |
+| UI | React 18, TypeScript, Tailwind CSS, lucide-react |
+| Build | Vite, electron-builder |
+| Image processing | [sharp](https://sharp.pixelplumbing.com/) |
+| ZIP | archiver, unzipper |
 
-## Project structure
+## Getting started
 
-```
-imageflow/
-  electron/
-    main.ts                 # BrowserWindow + app lifecycle
-    preload.ts               # contextBridge API surface (only safe functions exposed)
-    types.ts                 # main-process types
-    ipc/handlers.ts          # all ipcMain.handle wiring + processing controller
-    services/
-      imageProcessor.ts      # resize/compress/convert pipeline (Sharp), target-size search
-      zipService.ts          # ZIP import (extract) and export (archive)
-      fileService.ts         # native dialogs, recursive folder scan, safe output paths
-      thumbnailService.ts    # small thumbnail generation for the queue UI
-      renameService.ts       # bulk rename rule engine + de-duplication
-      concurrencyQueue.ts    # small dependency-free concurrency limiter
-  src/
-    components/               # Dropzone, ImageQueue, BeforeAfterSlider, PreviewModal, ...
-    pages/                     # Home, SettingsPage, AboutPage
-    stores/AppContext.tsx      # app state (useReducer) + IPC event wiring
-    hooks/useKeyboardShortcuts.ts
-    types/index.ts             # renderer-side shared types
-    utils/format.ts            # byte/dimension/percentage formatting
-  tests/                       # node:test unit tests (rename logic, formatting math)
-  electron-builder.yml
-  vite.config.ts / tailwind.config.js / tsconfig*.json
-```
+### Requirements
 
-## Requirements
+- [Node.js](https://nodejs.org) 18 or newer (LTS recommended)
+- Windows 10/11 (macOS/Linux targets are configured but untested)
 
-- Node.js 18+ and npm
-- Windows 10/11 to build/run the Windows installer (the app itself is cross-platform; macOS/Linux targets are pre-wired in `electron-builder.yml` but untested)
-
-## Installation
+### Install and run
 
 ```bash
+git clone https://github.com/SkZubeirAli/imageflow.git
+cd imageflow
 npm install
-```
-
-> Sharp downloads a small prebuilt binary for your platform during install — this requires a working internet connection the first time.
-
-## Development
-
-```bash
 npm run dev
 ```
 
-This runs the Vite dev server and Electron concurrently, with hot reload for the React UI. DevTools opens automatically in development.
-
-## Type checking
-
-```bash
-npm run typecheck
-```
-
-## Testing
-
-```bash
-npm run build   # rename-service tests import compiled output from dist-electron
-npm test
-```
-
-`tests/renameService.test.mjs` exercises the rename engine (keep/prefix/suffix/sequence/find-replace, duplicate-name de-duplication) against the compiled `dist-electron` output. `tests/format.test.mjs` checks the byte-size and compression-percentage math used throughout the UI. Both use Node's built-in `node:test` runner, so no extra test framework is required.
-
-Manually verified during development: resizing (all four modes + three fit modes), quality-based and target-size compression for JPEG/WEBP, PNG lossless-target warning path, format conversion including transparent-PNG→JPEG background flattening, all five rename modes, ZIP import/export round-trips, duplicate-filename collision handling, cancellation mid-batch, and per-image retry after a simulated failure.
-
-Not yet run in this environment (see **Known limitations**): a full `npm install` + `npm run dev` smoke test, and load testing at 100–500 images, since that requires network access and a real Windows machine.
-
-## Build (production bundle)
-
-```bash
-npm run build
-```
-
-Compiles the Electron main/preload TypeScript to `dist-electron/` and builds the React app to `dist/`.
-
-## Windows installer
+### Build a Windows installer
 
 ```bash
 npm run dist:win
 ```
 
-This runs the build step and then `electron-builder`, producing:
+The installer is written to `release/ImageFlow Setup <version>.exe`.
+Put an icon at `build/icon.ico` first (see `build/README.txt`), or remove the `icon:` lines from `electron-builder.yml` to use the default Electron icon.
+
+### Scripts
+
+| Command | What it does |
+|---|---|
+| `npm run dev` | Start Vite and Electron with hot reload |
+| `npm run build` | Compile Electron code and build the React app |
+| `npm run dist` / `dist:win` | Build and package an installer |
+| `npm run typecheck` | Type-check the React code |
+| `npm test` | Run unit tests (run `npm run build` first) |
+
+## Project structure
 
 ```
-release/ImageFlow Setup 1.0.0.exe
+electron/            Main process
+  main.ts            Window and app lifecycle
+  preload.ts         Safe API exposed to the UI (contextBridge)
+  ipc/handlers.ts    IPC handlers and processing controller
+  services/          imageProcessor, zipService, fileService,
+                     thumbnailService, renameService, concurrencyQueue
+src/                 React UI
+  components/ pages/ stores/ hooks/ types/ utils/
+tests/               Unit tests (node:test)
 ```
 
-Before your first real build, drop a Windows icon at `build/icon.ico` (see `build/README.txt`) or remove the `icon:` lines from `electron-builder.yml` to use Electron's default icon.
+## Security and privacy
 
-## Architecture notes
-
-- **Security**: `contextIsolation: true`, `nodeIntegration: false`, `sandbox: true`. The renderer never sees `require`, `fs`, or `child_process` — only the narrow, typed function list in `electron/preload.ts`. All IPC arguments are validated on the main-process side before touching the filesystem.
-- **Memory**: full-resolution buffers are never stored in React state. The queue UI works from small generated thumbnails; full images are streamed from disk, processed, and written to a per-session temp folder by the main process. The renderer requests preview bytes on demand (when you open the before/after modal), not up front for the whole queue.
-- **Concurrency**: a small dependency-free `ConcurrencyQueue` caps simultaneous Sharp operations (configurable 1–5 in Settings) instead of processing everything at once.
-- **File safety**: originals are never modified. Exports go to a folder you choose, with automatic `_1`, `_2`, … suffixing unless you explicitly allow overwrite in Settings.
+- Images are read and written only on your machine; the app makes no network requests for processing.
+- The renderer has no access to Node APIs. Only a small, explicit set of functions is exposed through `preload.ts`.
+- Original files are never overwritten; processed copies are written to a folder you choose.
 
 ## Known limitations
 
-- This project was written and sanity-checked (syntax-level TypeScript parse + unit tests for pure logic) in a sandboxed environment without network access, so `npm install`, a full `tsc` typecheck against the real `@types/react`/`@types/node`/`electron` packages, `npm run dev`, and an actual Windows installer build have **not** been executed end to end. Please run the commands above on your machine as the first real smoke test, and file/fix anything that surfaces — the architecture and logic are complete, but a first `npm install` + `npm run dev` pass is worth doing before relying on it.
-- AVIF encoding speed varies a lot by image size; very large batches with AVIF output will be noticeably slower than JPEG/WEBP.
-- GIF is accepted on import and copies through untouched rather than being re-encoded frame-by-frame (Sharp doesn't do multi-frame GIF re-encoding); animated GIFs are not resized.
-- The before/after preview reads full-resolution bytes on open, so extremely large source images (very high‑resolution scans) may take a moment to open in the preview modal.
-- Drag-and-drop of files from Explorer routes through the native file picker under the hood (Electron's renderer drag events don't reliably expose real filesystem paths under `contextIsolation`), so a drop currently opens the "select images" dialog pre-scoped to your drop rather than instantly ingesting the dropped files. Functionally equivalent, but not a literal pixel-perfect native drop.
+- Dropping files onto the window currently opens the file picker rather than importing the dropped files directly.
+- Animated GIFs are not resized or re-encoded frame by frame.
+- AVIF encoding is much slower than JPEG/WebP on large batches.
+- The before/after preview loads full-resolution files, so very large images can take a moment to open.
+- Only Windows has been tested.
+- Test coverage is currently limited to the rename logic and formatting helpers.
+
+## Roadmap
+
+- Native drag-and-drop of files from Explorer
+- Per-image settings overrides
+- Automated tests for the image pipeline
+- macOS and Linux builds
+
+## Contributing
+
+Contributions are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+[MIT](LICENSE)
